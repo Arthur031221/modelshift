@@ -18,11 +18,11 @@ inputs:
     required: false
     default: "retired,retiring"
   version:
-    description: modelshift version to run from npm
+    description: modelshift git ref (tag) to run, not on the npm registry yet
     required: false
-    default: "0.1.0"
+    default: "v0.1.0"
 runs:
   using: composite
   steps:
     - shell: bash
-      run: npx --yes modelshift@${{ inputs.version }} check "${{ inputs.path }}" --days "${{ inputs.days }}" --fail-on "${{ inputs.fail-on }}" --annotations
+      run: npx --yes github:Arthur031221/modelshift#${{ inputs.version }} check "${{ inputs.path }}" --days "${{ inputs.days }}" --fail-on "${{ inputs.fail-on }}" --annotations

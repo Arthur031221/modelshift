@@ -18,23 +18,35 @@ Swapping the string is the easy part. The hard part is knowing whether the repla
 
 ## Install
 
+Not on the npm registry yet, see the roadmap. Two ways to run it today:
+
 ```
-npx modelshift
+npx github:Arthur031221/modelshift scan
 ```
 
-Node 20 or newer. No API keys are needed for `scan`, `check`, `fix` and `registry`. `replay` talks to whichever endpoint you point it at, including a local Ollama server.
+or install it on your `PATH`:
+
+```
+git clone https://github.com/Arthur031221/modelshift
+cd modelshift
+npm install -g .
+```
+
+Both build the CLI automatically (the `prepare` script runs `tsup`). Node 20 or newer. No API keys are needed for `scan`, `check`, `fix` and `registry`. `replay` talks to whichever endpoint you point it at, including a local Ollama server.
 
 ## Quick start
 
+Run these from inside the clone the first time, they point at the bundled `examples/sample-app` and `demo/prompts.jsonl` so you see real output in under a minute. Point them at your own repo and prompt file afterward.
+
 ```
 # 1. What retires, where, and what replaces it (exit code 1 when something retires within 90 days)
-npx modelshift scan
+modelshift scan examples/sample-app
 
 # 2. Does the replacement behave the same? Runs six prompts on two local models and writes modelshift-report.html
-npx modelshift replay --from qwen3:1.7b --to qwen3:4b --prompts demo/prompts.jsonl --no-think
+modelshift replay --from qwen3:1.7b --to qwen3:4b --prompts demo/prompts.jsonl --no-think
 
 # 3. Rewrite the IDs, drop rejected parameters, print the diff. Add --write to apply, --pr to open a pull request.
-npx modelshift fix
+modelshift fix examples/sample-app
 ```
 
 `scan` output for the sample app in this repo:
@@ -137,7 +149,7 @@ Same as `scan` but prints only failing findings, emits GitHub Actions annotation
     days: 60
 ```
 
-The action is a composite that runs `npx modelshift@<version> check`. A copy of a full workflow is in `examples/workflows/modelshift-check.yml`.
+The action is a composite that runs `npx --yes github:Arthur031221/modelshift#<version> check`, since modelshift is not on the npm registry yet. A copy of a full workflow is in `examples/workflows/modelshift-check.yml`.
 
 ### replay
 
