@@ -42,5 +42,8 @@ export function shortUrl(url: string | null): string {
 }
 
 export function plural(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
+  if (n === 1) return `${n} ${word}`;
+  const consonantY = /[^aeiou]y$/i.test(word);
+  const plural = consonantY ? `${word.slice(0, -1)}ies` : `${word}s`;
+  return `${n} ${plural}`;
 }

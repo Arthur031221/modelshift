@@ -6,8 +6,13 @@ export function isISODate(value: unknown): value is string {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
+/** Local calendar date, not UTC. A run late in the evening in a UTC+ zone,
+ * or early morning in a UTC- zone, must not report tomorrow's or yesterday's date. */
 export function todayISO(now: Date = new Date()): string {
-  return now.toISOString().slice(0, 10);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function toUTC(iso: string): number {
