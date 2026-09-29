@@ -1,0 +1,22 @@
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# local artifacts produced by the tool
+modelshift-report.html
+modelshift-sessions.jsonl
+*.log
+
+# environment and secrets
+.env
+.env.local
+.env.*.local
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# scratch
+tmp/

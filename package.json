@@ -1,0 +1,62 @@
+{
+  "name": "modelshift",
+  "version": "0.1.0",
+  "description": "Find every model ID in your repo that retires soon, replay your real prompts on the replacement, and open the migration PR.",
+  "license": "MIT",
+  "author": "Arthur <levi74108520963@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arthur031221/modelshift.git"
+  },
+  "homepage": "https://github.com/Arthur031221/modelshift#readme",
+  "bugs": {
+    "url": "https://github.com/Arthur031221/modelshift/issues"
+  },
+  "keywords": [
+    "llm",
+    "model-deprecation",
+    "openai",
+    "anthropic",
+    "gemini",
+    "migration",
+    "cli",
+    "ci",
+    "regression",
+    "prompt-testing"
+  ],
+  "type": "module",
+  "bin": {
+    "modelshift": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "registry/lifecycle.json",
+    "registry/prices.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "registry:refresh": "node scripts/refresh-registry.mjs",
+    "registry:validate": "node dist/cli.js registry validate",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "diff": "9.0.0",
+    "ignore": "7.0.10"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@types/node": "26.6.3",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "5.0.2"
+  }
+}
