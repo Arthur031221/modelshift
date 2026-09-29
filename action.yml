@@ -1,0 +1,28 @@
+name: modelshift check
+description: Fail the workflow when a model ID in the repository retires within N days.
+author: Arthur031221
+branding:
+  icon: clock
+  color: red
+inputs:
+  path:
+    description: Directory to scan
+    required: false
+    default: "."
+  days:
+    description: Fail when a model retires within this many days
+    required: false
+    default: "90"
+  fail-on:
+    description: Comma separated statuses that fail the check (retired, retiring, deprecated, eligible, unknown)
+    required: false
+    default: "retired,retiring"
+  version:
+    description: modelshift version to run from npm
+    required: false
+    default: "0.1.0"
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: npx --yes modelshift@${{ inputs.version }} check "${{ inputs.path }}" --days "${{ inputs.days }}" --fail-on "${{ inputs.fail-on }}" --annotations

@@ -1,0 +1,36 @@
+name: Refresh registry
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Re-fetch provider lifecycle pages
+        run: node scripts/refresh-registry.mjs
+      - run: node dist/cli.js registry validate
+      - name: Open a pull request when the registry changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Refresh lifecycle registry"
+          title: "Refresh lifecycle registry"
+          body: |
+            Automated re-fetch of the OpenAI, Anthropic, Gemini and Bedrock lifecycle pages.
+            The parser is best effort. Compare every changed date against the source URL in the entry before merging.
+          branch: registry-refresh
+          delete-branch: true
+          add-paths: registry/lifecycle.json
