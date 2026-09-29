@@ -2,7 +2,7 @@
 
 Your model changed. Find out what broke before your users do.
 
-`modelshift` finds every model ID in your repo that retires soon, replays your real prompts on the replacement, and opens the migration PR. The bundled registry currently lists 26 model IDs with a provider shutdown date inside the next 90 days, including the 11 OpenAI snapshots that stop working on 2026-10-23.[^1]
+`modelshift` finds every model ID in your repo that retires soon, replays your real prompts on the replacement, and opens the migration PR. A scan of four popular, unrelated open-source repositories found 131 distinct model IDs that are retiring or already retired within 90 days, referenced 1,649 times across 296 files.[^1] The bundled registry separately lists 26 model IDs with a provider shutdown date inside the next 90 days, including the 11 OpenAI snapshots that stop working on 2026-10-23.[^2]
 
 [![CI](https://github.com/Arthur031221/modelshift/actions/workflows/ci.yml/badge.svg)](https://github.com/Arthur031221/modelshift/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -40,17 +40,44 @@ npx modelshift fix
 `scan` output for the sample app in this repo:
 
 ```
-FILE                MODEL                                     PROVIDER   STATUS                             REPLACEMENT                 SOURCE
-app.py:21           claude-3-5-sonnet-20241022                anthropic  retired 2025-10-28                 claude-sonnet-4-6           platform.claude.com/docs/en/about-claude/model-deprecations
-config.yaml:3       claude-3-haiku-20240307                   anthropic  retired 2026-04-20                 claude-haiku-4-5-20251001   platform.claude.com/docs/en/about-claude/model-deprecations
-config.yaml:2       gemini-2.0-flash                          google     retired 2026-06-01                 gemini-3.6-flash            ai.google.dev/gemini-api/docs/deprecations
-config.yaml:6       anthropic.claude-sonnet-4-20250514-v1:0   bedrock    retiring in 14 days (2026-10-14)   anthropic.claude-sonnet-4-6 docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html
-app.py:12           gpt-4o-2024-05-13                         openai     retiring in 23 days (2026-10-23)   gpt-5.6-sol                 developers.openai.com/api/docs/deprecations
-router.ts:2         gpt-4.1-nano                              openai     retiring in 23 days (2026-10-23)   gpt-5.6-luna                developers.openai.com/api/docs/deprecations
-router.ts:3         o3-mini                                   openai     retiring in 23 days (2026-10-23)   gpt-5.6-sol                 developers.openai.com/api/docs/deprecations
-.env.example:1      gpt-4-turbo                               openai     retiring in 23 days (2026-10-23)   gpt-5.6-sol                 developers.openai.com/api/docs/deprecations
-router.ts:4         claude-sonnet-4-5                         anthropic  eligible for retirement since 2026-09-29                       platform.claude.com/docs/en/about-claude/model-deprecations
+FILE            MODEL                                    PROVIDER   STATUS                                    REPLACEMENT                  SOURCE
+app.py:21       claude-3-5-sonnet-20241022               anthropic  retired 2025-10-28                        claude-sonnet-4-6            platform.claude.com/docs/en/about-claude/model-deprecations
+config.yaml:3   claude-3-haiku-20240307                  anthropic  retired 2026-04-20                        claude-haiku-4-5-20251001    platform.claude.com/docs/en/about-claude/model-deprecations
+.env.example:2  claude-opus-4-1                          anthropic  retired 2026-08-05                        claude-opus-4-8              platform.claude.com/docs/en/about-claude/model-deprecations
+config.yaml:2   gemini-2.0-flash                         google     retired 2026-06-01                        gemini-3.6-flash             ai.google.dev/gemini-api/docs/deprecations
+config.yaml:6   anthropic.claude-sonnet-4-20250514-v1:0  bedrock    retiring in 14 days (2026-10-14)          anthropic.claude-sonnet-4-6  docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html
+app.py:12       gpt-4o-2024-05-13                        openai     retiring in 23 days (2026-10-23)          gpt-5.6-sol                  developers.openai.com/api/docs/deprecations
+router.ts:2     gpt-4.1-nano                             openai     retiring in 23 days (2026-10-23)          gpt-5.6-luna                 developers.openai.com/api/docs/deprecations
+router.ts:3     o3-mini                                  openai     retiring in 23 days (2026-10-23)          gpt-5.6-sol                  developers.openai.com/api/docs/deprecations
+.env.example:1  gpt-4-turbo                              openai     retiring in 23 days (2026-10-23)          gpt-5.6-sol                  developers.openai.com/api/docs/deprecations
+router.ts:4     claude-sonnet-4-5                         anthropic  eligible for retirement since 2026-09-29                               platform.claude.com/docs/en/about-claude/model-deprecations
 ```
+
+`replay` output for the same six-prompt set against a local Ollama server, `qwen3:1.7b` to `qwen3:4b`, `--no-think`:
+
+```
+PROMPT         JSON     REFUSAL  TOOL CALLS  LENGTH  LATENCY MS      SIM  RESULT
+json-extract   ok > ok  no > no  - > -         +15%  82213 > 4744   1.00  ok
+json-list      ok > ok  no > no  - > -       +1730%  1421 > 29112   0.36  low similarity
+summary        - > -    no > no  - > -        +670%  3793 > 44812   0.57  ok
+tool-weather   - > -    no > no  1 > 0            -  1504 > 42399   0.00  tool shape changed, no tool call, low similarity
+code           - > -    no > no  - > -       +1362%  2292 > 41977   0.39  low similarity
+refusal-probe  - > -    no > no  - > -         +50%  19786 > 43767  0.53  ok
+
+Aggregate (from > to)
+  errors          0 > 0
+  refusals        0 > 0
+  valid JSON      2/2 > 2/2
+  tool calls      1/1 > 0/1, shape changed on 1
+  mean length     363 > 1531 chars (+765%)
+  mean latency    18502 > 34469 ms
+  cost            $0 > $0 (local models)
+  similarity      0.474 mean, lexical cosine (term frequencies)
+  regressions     3 of 6 prompts
+```
+
+On this machine `qwen3:1.7b` called the `get_weather` tool through Ollama's native API and `qwen3:4b` answered in prose instead, which is exactly the kind of regression `replay` exists to catch before it reaches production. `json-extract` and `json-list` stayed valid JSON on both models. Latency is not comparable to a dedicated inference box, this ran on a shared laptop with other processes competing for the GPU.
+
 
 ## How it works
 
@@ -166,4 +193,6 @@ See `CONTRIBUTING.md`. Registry corrections with a source link are the most usef
 
 MIT, copyright 2026 Arthur.
 
-[^1]: Count of entries in `registry/lifecycle.json` whose `retirement` date falls between 2026-09-30 and 2026-12-29, produced by `modelshift registry list --status retiring --json --today 2026-09-30`. The registry was built on 2026-09-29 from the OpenAI deprecations page, the Anthropic model deprecations page, the Gemini API deprecations page and changelog, and the Amazon Bedrock legacy model lifecycle page. Entries whose dates could not be read from those pages are excluded and listed in `registry/UNVERIFIED.md`.
+[^1]: `node dist/cli.js scan <dir> --known-only --json --today 2026-09-30` against four shallow clones taken 2026-09-30 (registry built 2026-09-29): `langchain-ai/langchain` at `a9780cd` (2026-09-29), `open-webui/open-webui` at `8bd8b4f` (2026-09-21), `crewAIInc/crewAI` at `a0d16dd` (2026-09-29), `mckaywrigley/chatbot-ui` at `81328b6` (2024-06-22, last pushed 2024-08-03, still at 33,349 stars and 9,407 forks on 2026-09-30). Summed `counts.retiring` plus `counts.retired` per repo: langchain 361, open-webui 17, crewAI 1,225, chatbot-ui 46, total 1,649 across 296 files. Piping the combined `findings` arrays through `jq '[.[] | select(.status=="retiring" or .status=="retired") | .id] | unique | length'` gives 131 distinct model IDs. Occurrence counts are not evenly distributed: crewAI's built-in model catalog (`llms/constants.py`) and its recorded HTTP test fixtures (`tests/cassettes/*.yaml`, which repeat the same ID on every streamed chunk) together account for over half of its 1,225. The distinct-ID count is the more representative number of the two. The registry's own count, independent of any repo scan, is `modelshift registry list --status retiring --json --today 2026-09-30`, which lists entries whose `retirement` date falls between 2026-09-30 and 2026-12-29. The registry was built on 2026-09-29 from the OpenAI deprecations page, the Anthropic model deprecations page, the Gemini API deprecations page and changelog, and the Amazon Bedrock legacy model lifecycle page. Entries whose dates could not be read from those pages are excluded and listed in `registry/UNVERIFIED.md`.
+
+[^2]: Count of entries in `registry/lifecycle.json` whose `retirement` date falls between 2026-09-30 and 2026-12-29, produced by `modelshift registry list --status retiring --json --today 2026-09-30`.

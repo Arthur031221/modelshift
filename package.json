@@ -18,11 +18,13 @@
     "openai",
     "anthropic",
     "gemini",
+    "bedrock",
     "migration",
     "cli",
-    "ci",
-    "regression",
-    "prompt-testing"
+    "github-action",
+    "prompt-testing",
+    "ollama",
+    "typescript"
   ],
   "type": "module",
   "bin": {
