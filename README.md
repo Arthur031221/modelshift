@@ -2,13 +2,14 @@
 
 Your model changed. Find out what broke before your users do.
 
+![modelshift scan and fix on the bundled sample app](assets/demo.gif)
+
 `modelshift` finds every model ID in your repo that retires soon, replays your real prompts on the replacement, and opens the migration PR. A scan of four popular, unrelated open-source repositories found 131 distinct model IDs that are retiring or already retired within 90 days, referenced 1,649 times across 296 files.[^1] The bundled registry separately lists 26 model IDs with a provider shutdown date inside the next 90 days, including the 11 OpenAI snapshots that stop working on 2026-10-23.[^2]
 
 [![CI](https://github.com/Arthur031221/modelshift/actions/workflows/ci.yml/badge.svg)](https://github.com/Arthur031221/modelshift/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/modelshift.svg)](https://www.npmjs.com/package/modelshift)
 
-![modelshift demo](demo/demo.gif)
 
 ## Why
 
