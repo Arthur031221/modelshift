@@ -197,6 +197,12 @@ Privacy of `--from-sessions`: the log files are opened read only. Only user turn
 - Costs use the bundled price table and are zero for local servers. Prices are from the provider pricing pages as of 2026-09-29.
 - Nothing in this tool uploads your code or prompts anywhere except to the model endpoints you name in `replay`.
 
+## Related projects
+
+- [llm-doctor](https://github.com/Arthur031221/llm-doctor): Diagnoses your local model setup the way modelshift diagnoses the model references in your code.
+- [shiftgear](https://github.com/Arthur031221/shiftgear): Decides which model and effort level an agent should use right now. modelshift tells you when a model ID in your code is about to stop working.
+- [inference-visually](https://github.com/Arthur031221/inference-visually): Explains what changes when you swap models, background reading for the migration modelshift finds you need to make.
+
 ## Contributing
 
 See `CONTRIBUTING.md`. Registry corrections with a source link are the most useful contribution.
